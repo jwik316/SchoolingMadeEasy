@@ -1,0 +1,208 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Maths Translator Exercise</title>
+<style>
+body{margin:0;font-family:system-ui,-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;background:#FAF7F0;color:#1a1a2e;}
+.pme-wrap{max-width:880px;margin:0 auto;padding:18px;}
+select,button{font:inherit;}
+@media (max-width:600px){
+  .pme-controls-row{flex-direction:column;}
+}
+</style>
+</head>
+<body>
+<div class="pme-wrap">
+
+<div style="background:#1B2A4A;color:#ffffff;border-radius:22px;padding:24px 18px;text-align:center;margin-bottom:16px;">
+<h1 style="margin:0;color:#ffffff;font-size:30px;line-height:1.1;">Maths Translator Exercise</h1>
+<p style="margin:8px 0 0 0;color:#F4A921;font-weight:700;font-size:15px;">One idea. Many mathematical languages.</p>
+</div>
+
+<div id="pme-mte-controls" style="background:#ffffff;border:1px solid rgba(0,0,0,.08);border-radius:18px;padding:16px;margin-bottom:16px;">
+<div class="pme-controls-row" style="display:flex;flex-wrap:wrap;gap:12px;">
+
+<div style="flex:1 1 160px;">
+<label for="given" style="display:block;font-size:13px;font-weight:700;color:#1B2A4A;margin-bottom:6px;">Starting clue</label>
+<select id="given" style="width:100%;min-height:44px;border-radius:10px;border:1px solid rgba(0,0,0,.15);background:#fff;padding:8px 10px;font-size:14px;box-sizing:border-box;">
+<option value="percentage">Percentage</option>
+<option value="fraction">Fraction</option>
+<option value="decimal">Decimal</option>
+<option value="ratio">Ratio</option>
+<option value="angle">Pie chart angle</option>
+<option value="word">Word problem</option>
+</select>
+</div>
+
+<div style="flex:1 1 160px;">
+<label for="difficulty" style="display:block;font-size:13px;font-weight:700;color:#1B2A4A;margin-bottom:6px;">Difficulty</label>
+<select id="difficulty" style="width:100%;min-height:44px;border-radius:10px;border:1px solid rgba(0,0,0,.15);background:#fff;padding:8px 10px;font-size:14px;box-sizing:border-box;">
+<option value="friendly">Friendly values</option>
+<option value="mixed">Mixed values</option>
+</select>
+</div>
+
+<div style="flex:1 1 160px;">
+<label for="showAnswers" style="display:block;font-size:13px;font-weight:700;color:#1B2A4A;margin-bottom:6px;">Mode</label>
+<select id="showAnswers" style="width:100%;min-height:44px;border-radius:10px;border:1px solid rgba(0,0,0,.15);background:#fff;padding:8px 10px;font-size:14px;box-sizing:border-box;">
+<option value="hide">Student worksheet</option>
+<option value="show">Teacher answer key</option>
+</select>
+</div>
+
+<div style="flex:1 1 160px;display:flex;align-items:flex-end;">
+<button type="button" id="pme-mte-generate-btn" style="width:100%;min-height:44px;border-radius:10px;border:none;background:#F4A921;color:#1B2A4A;font-weight:800;font-size:14px;cursor:pointer;box-sizing:border-box;">Generate variation</button>
+</div>
+
+</div>
+</div>
+
+<div id="pme-mte-rule" style="background:#fff7e6;border-left:5px solid #F4A921;border-radius:16px;padding:14px 16px;margin-bottom:16px;font-size:14px;line-height:1.6;">
+<strong>Friendly-number rule:</strong> pupil counts are whole numbers; decimals terminate; percentages and pie-chart angles use at most 1 decimal place.
+</div>
+
+<div style="background:#ffffff;border:1px solid rgba(0,0,0,.08);border-radius:18px;padding:18px;">
+
+<div id="question" style="background:#fff7e6;border-left:6px solid #F4A921;border-radius:12px;padding:16px;font-size:19px;font-weight:700;color:#1B2A4A;line-height:1.4;"></div>
+
+<div style="overflow-x:auto;margin-top:16px;">
+<table style="width:100%;min-width:420px;border-collapse:collapse;font-size:14px;">
+<thead>
+<tr>
+<th style="background:#eef6ff;color:#1B2A4A;padding:10px 12px;text-align:left;border:1px solid rgba(0,0,0,.08);width:42%;">Representation</th>
+<th style="background:#eef6ff;color:#1B2A4A;padding:10px 12px;text-align:left;border:1px solid rgba(0,0,0,.08);">Answer</th>
+</tr>
+</thead>
+<tbody id="rows"></tbody>
+</table>
+</div>
+
+<div style="margin-top:16px;border:2px dashed #98A2B4;border-radius:12px;min-height:160px;padding:14px;">
+<div style="font-weight:800;color:#1B2A4A;font-size:15px;margin-bottom:6px;">Model drawing</div>
+<div id="modelAnswer" style="font-size:14px;line-height:1.6;"></div>
+</div>
+
+<div style="margin-top:16px;text-align:center;color:#1B2A4A;font-weight:700;font-size:14px;">
+The language may change, but the mathematics stays the same.
+</div>
+
+</div>
+
+<div id="pme-mte-actionbar" style="display:flex;flex-wrap:wrap;gap:10px;margin-top:16px;">
+<button type="button" id="pme-mte-print-btn" style="flex:1 1 160px;min-height:44px;border-radius:10px;border:none;background:#1B2A4A;color:#fff;font-weight:800;font-size:14px;cursor:pointer;">Print / Save PDF</button>
+<button type="button" id="pme-mte-copy-btn" style="flex:1 1 160px;min-height:44px;border-radius:10px;border:none;background:#1B2A4A;color:#fff;font-weight:800;font-size:14px;cursor:pointer;">Copy question text</button>
+</div>
+
+</div>
+
+<script>
+const pmeFriendly = [
+  {num:1, den:5}, {num:1, den:4}, {num:3, den:10}, {num:2, den:5},
+  {num:1, den:2}, {num:3, den:5}, {num:7, den:10}, {num:3, den:4},
+  {num:4, den:5}, {num:9, den:10},
+  {num:1, den:8}, {num:3, den:8}, {num:5, den:8}, {num:7, den:8}
+];
+
+const pmeMixed = [
+  ...pmeFriendly,
+  {num:1, den:20}, {num:3, den:20}, {num:7, den:20}, {num:9, den:20},
+  {num:11, den:20}, {num:13, den:20}, {num:17, den:20}, {num:19, den:20}
+];
+
+function pmeGcd(a,b){
+  while(b){ [a,b]=[b,a%b]; }
+  return a;
+}
+function pmeSimplify(n,d){
+  const g=pmeGcd(n,d);
+  return [n/g,d/g];
+}
+function pmePick(arr){
+  return arr[Math.floor(Math.random()*arr.length)];
+}
+function pmeFriendlyNumber(value,maxDp=1){
+  return String(Number(value.toFixed(maxDp)));
+}
+
+function pmeGenerate(){
+  const level=document.getElementById("difficulty").value;
+  const given=document.getElementById("given").value;
+  const show=document.getElementById("showAnswers").value==="show";
+  const pool=level==="friendly"?pmeFriendly:pmeMixed;
+  const f=pmePick(pool);
+
+  const multiplier=pmePick([2,3,4,5,6,8,10,12]);
+  const total=f.den*multiplier;
+  const part=f.num*multiplier;
+  const rest=total-part;
+
+  const percent=(f.num/f.den)*100;
+  const decimal=f.num/f.den;
+  const angle=(f.num/f.den)*360;
+  const [r1,r2]=pmeSimplify(part,rest);
+
+  const percentText=pmeFriendlyNumber(percent,1);
+  const decimalText=pmeFriendlyNumber(decimal,3);
+  const angleText=pmeFriendlyNumber(angle,1);
+
+  let clue="";
+  if(given==="percentage") clue=`${percentText}% of the pupils chose Basketball.`;
+  if(given==="fraction") clue=`${f.num}/${f.den} of the pupils chose Basketball.`;
+  if(given==="decimal") clue=`${decimalText} of the pupils chose Basketball.`;
+  if(given==="ratio") clue=`The ratio of pupils who chose Basketball to those who did not was ${r1} : ${r2}.`;
+  if(given==="angle") clue=`In a pie chart, the sector for Basketball measured ${angleText}\u00b0.`;
+  if(given==="word") clue=`${part} pupils chose Basketball. They formed ${percentText}% of all the pupils.`;
+
+  document.getElementById("question").innerHTML=
+    `<strong>Starting clue:</strong> ${clue}<div style="margin-top:6px;font-size:13px;font-weight:400;color:#444;">Complete all the representations below.</div>`;
+
+  const answers=[
+    ["Total number of pupils",total],
+    ["Number of pupils who chose Basketball",part],
+    ["Fraction of the whole",`${f.num}/${f.den}`],
+    ["Decimal of the whole",decimalText],
+    ["Percentage of the whole",`${percentText}%`],
+    ["Ratio (Basketball : Others)",`${r1} : ${r2}`],
+    ["Pie chart angle",`${angleText}\u00b0`],
+    ["Equivalent statement",`${part} out of ${total} pupils chose Basketball.`]
+  ];
+
+  document.getElementById("rows").innerHTML=answers.map(([label,answer],i)=>
+    `<tr style="background:${i%2===0?'#ffffff':'#FAF7F0'};">
+      <td style="padding:10px 12px;border:1px solid rgba(0,0,0,.08);font-weight:700;color:#1B2A4A;">${label}</td>
+      <td style="padding:10px 12px;border:1px solid rgba(0,0,0,.08);">${show?`<strong>${answer}</strong>`:""}</td>
+    </tr>`
+  ).join("");
+
+  document.getElementById("modelAnswer").innerHTML=show
+    ? `<p style="margin:0 0 6px 0;"><strong>Suggested model:</strong> Draw ${f.den} equal units and shade ${f.num} units.</p>
+       <p style="margin:0;">1 unit = ${total/f.den} pupils</p>`
+    : "";
+}
+
+function pmePrint(){
+  const ids=["pme-mte-controls","pme-mte-rule","pme-mte-actionbar"];
+  ids.forEach(id=>{ const el=document.getElementById(id); if(el) el.style.display="none"; });
+  window.print();
+  ids.forEach(id=>{ const el=document.getElementById(id); if(el) el.style.display=""; });
+}
+
+function pmeCopyQuestion(){
+  const text=document.getElementById("question").innerText;
+  navigator.clipboard.writeText(text).then(
+    ()=>alert("Question copied."),
+    ()=>alert("Copy failed. Select the text manually.")
+  );
+}
+
+document.getElementById("pme-mte-generate-btn").addEventListener("click", pmeGenerate);
+document.getElementById("pme-mte-print-btn").addEventListener("click", pmePrint);
+document.getElementById("pme-mte-copy-btn").addEventListener("click", pmeCopyQuestion);
+
+pmeGenerate();
+</script>
+</div>
+</body>
+</html>
